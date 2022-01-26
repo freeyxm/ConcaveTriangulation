@@ -31,36 +31,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace John_W_Ratcliff
 {
-    // Typedef an STL vector of vertices which are used to represent
-    // a polygon/contour and a series of triangles.
-    using Vector2dVector = System.Collections.Generic.List<Vector2d>;
-
-
-    public class Vector2d
-    {
-        public Vector2d(float x, float y)
-        {
-            Set(x, y);
-        }
-
-        public float GetX() { return mX; }
-
-        public float GetY() { return mY; }
-
-        public void Set(float x, float y)
-        {
-            mX = x;
-            mY = y;
-        }
-
-        float mX;
-        float mY;
-    }
-
-
     public class Triangulate
     {
         const float EPSILON = 0.0000000001f;
@@ -69,7 +43,7 @@ namespace John_W_Ratcliff
         /// triangulate a contour/polygon, places results in STL vector
         /// as series of triangles.
         /// </summary>
-        public static bool Process(Vector2dVector contour, ref Vector2dVector result)
+        public static bool Process(IList<Vector2> contour, ref IList<Vector2> result)
         {
             /* allocate and initialize list of Vertices in polygon */
 
@@ -134,7 +108,7 @@ namespace John_W_Ratcliff
         /// </summary>
         /// <param name="contour"></param>
         /// <returns></returns>
-        static float Area(Vector2dVector contour)
+        static float Area(IList<Vector2> contour)
         {
             int n = contour.Count;
 
@@ -142,7 +116,7 @@ namespace John_W_Ratcliff
 
             for (int p = n - 1, q = 0; q < n; p = q++)
             {
-                A += contour[p].GetX() * contour[q].GetY() - contour[q].GetX() * contour[p].GetY();
+                A += contour[p].X * contour[q].Y - contour[q].X * contour[p].Y;
             }
             return A * 0.5f;
         }
@@ -174,27 +148,27 @@ namespace John_W_Ratcliff
         }
 
 
-        static bool Snip(Vector2dVector contour, int u, int v, int w, int n, int[] V)
+        static bool Snip(IList<Vector2> contour, int u, int v, int w, int n, int[] V)
         {
             int p;
             float Ax, Ay, Bx, By, Cx, Cy, Px, Py;
 
-            Ax = contour[V[u]].GetX();
-            Ay = contour[V[u]].GetY();
+            Ax = contour[V[u]].X;
+            Ay = contour[V[u]].Y;
 
-            Bx = contour[V[v]].GetX();
-            By = contour[V[v]].GetY();
+            Bx = contour[V[v]].X;
+            By = contour[V[v]].Y;
 
-            Cx = contour[V[w]].GetX();
-            Cy = contour[V[w]].GetY();
+            Cx = contour[V[w]].X;
+            Cy = contour[V[w]].Y;
 
             if (EPSILON > (((Bx - Ax) * (Cy - Ay)) - ((By - Ay) * (Cx - Ax)))) return false;
 
             for (p = 0; p < n; p++)
             {
                 if ((p == u) || (p == v) || (p == w)) continue;
-                Px = contour[V[p]].GetX();
-                Py = contour[V[p]].GetY();
+                Px = contour[V[p]].X;
+                Py = contour[V[p]].Y;
                 if (InsideTriangle(Ax, Ay, Bx, By, Cx, Cy, Px, Py)) return false;
             }
 
